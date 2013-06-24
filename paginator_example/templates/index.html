@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+		table th, table td {
+		    border: 1px solid #CCC;
+		}
+		
+	</style>
+    </head>
+    <body>
+        <table>
+	        <thead>
+	            <tr>
+	                <th>#</th>
+	                <th>Text</th>
+	            </tr>
+	        </thead>
+	        <tbody>
+		        {% for obj in obj_list %}
+		        <tr>
+                    <td>{{ forloop.counter }}</td>
+		            <td>{{ obj }}</td>
+		        </tr>
+		        {% endfor %}
+		    </tbody>
+	    </table>
+    </body>
+</html>
