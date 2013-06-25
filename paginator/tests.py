@@ -1,16 +1,96 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
-"""
-
 from django.test import TestCase
 
+from . import settings
+from .paginator import Paginator
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+class PaginatorTest(TestCase):
+    object_list = []
+
+    def setUp(self):
+        # contains 50 records
+        self.object_list = [i for i in range(1, 51)]
+
+    def test_default_config(self):
+        paginator = Paginator(self.object_list);
+        self.assertEqual(paginator.per_page, settings.PAGINATOR_PER_PAGE)
+        self.assertEqual(paginator.max_page_nav,
+                         settings.PAGINATOR_MAX_PAGE_NAV)
+        self.assertEqual(paginator.max_jumper,
+                         settings.PAGINATOR_MAX_JUMPER)
+        self.assertEqual(paginator.raise_404_on_invalid_page,
+                         settings.PAGINATOR_RAISE_404_ON_INVALID_PAGE)
+
+    def test_custom_config(self):
+        paginator = Paginator(self.object_list,
+                              per_page=20,
+                              max_page_nav=6,
+                              max_jumper=1,
+                              raise_404_on_invalid_page=True);
+        self.assertEqual(paginator.per_page, 20)
+        self.assertEqual(paginator.max_page_nav, 6)
+        self.assertEqual(paginator.max_jumper, 1)
+        self.assertEqual(paginator.raise_404_on_invalid_page, True)
+
+
+    def test_delta_odd(self):
+        paginator = Paginator(self.object_list, max_page_nav=5)
+
+        delta_left, delta_right = paginator._get_delta()
+        self.assertEqual(delta_left, 2)
+        self.assertEqual(delta_right, 2)
+
+    def test_delta_even(self):
+        paginator = Paginator(self.object_list, max_page_nav=10)
+
+        delta_left, delta_right = paginator._get_delta()
+        self.assertEqual(delta_left, 4)
+        self.assertEqual(delta_right, 5)
+
+    def test_main_page_numbers_exactly(self):
+        paginator = Paginator(self.object_list,
+                              per_page=10,
+                              max_page_nav=5)
+
+        self.assertEqual(paginator.num_pages, 5)
+        self.assertEqual(paginator._get_main_page_numbers(1), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(2), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(3), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(4), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(5), [1, 2, 3, 4, 5])
+
+    def test_main_page_numbers_short(self):
+        paginator = Paginator(self.object_list,
+                              per_page=20,
+                              max_page_nav=5)
+
+        self.assertEqual(paginator.num_pages, 3)
+        self.assertEqual(paginator._get_main_page_numbers(1), [1, 2, 3])
+        self.assertEqual(paginator._get_main_page_numbers(2), [1, 2, 3])
+        self.assertEqual(paginator._get_main_page_numbers(3), [1, 2, 3])
+
+    def test_main_page_numbers_long(self):
+        paginator = Paginator(self.object_list,
+                              per_page=7,
+                              max_page_nav=5)
+
+        self.assertEqual(paginator.num_pages, 8)
+        self.assertEqual(paginator._get_main_page_numbers(1), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(2), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(3), [1, 2, 3, 4, 5])
+        self.assertEqual(paginator._get_main_page_numbers(4), [2, 3, 4, 5, 6])
+        self.assertEqual(paginator._get_main_page_numbers(5), [3, 4, 5, 6, 7])
+        self.assertEqual(paginator._get_main_page_numbers(6), [4, 5, 6, 7, 8])
+        self.assertEqual(paginator._get_main_page_numbers(7), [4, 5, 6, 7, 8])
+        self.assertEqual(paginator._get_main_page_numbers(8), [4, 5, 6, 7, 8])
+        
+    def test_main_page_numbers_long(self):
+        paginator = Paginator(self.object_list,
+                              per_page=3,
+                              max_page_nav=5)
+
+        for page in range(1, paginator.num_pages + 1):
+            print "PAGE", page
+            print paginator._get_page_nav(page)
+            print "----------------"
+
+
