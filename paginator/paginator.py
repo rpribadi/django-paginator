@@ -77,14 +77,19 @@ class Paginator(Pgtr):
 
         jumpers = []
         interval = int(math.ceil(float(start_page - 1) / self.max_jumper))
-        minimimum_interval = 2
-        interval = max(interval, minimimum_interval)
         
         page = 1        
         while page < start_page:
             jumpers.append(page)
             page += interval
             
+        prev_page = start_page
+        for index, page in reversed(list(enumerate(jumpers))):
+            if prev_page - 1 != page:
+                jumpers.insert(index + 1, None)
+                break
+            prev_page = page
+
         return jumpers
 
     def _get_right_jumpers(self, end_page):
@@ -93,31 +98,41 @@ class Paginator(Pgtr):
 
         jumpers = []
         interval = int(math.ceil(float(self.num_pages - end_page) / self.max_jumper))
-        minimimum_interval = 2
-        interval = max(interval, minimimum_interval)
 
         page = self.num_pages
         while page > end_page:
             jumpers.append(page)
             page -= interval
+
         jumpers.reverse()
+
+        prev_page = end_page
+        for index, page in enumerate(jumpers):
+            if prev_page + 1 != page:
+                jumpers.insert(index, None)
+                break
+            prev_page = page
 
         return jumpers
 
     def _get_page_nav(self, page):
         page_nav = []
         if self.num_pages <= self.max_page_nav:
-            page_nav = [i for i in range(1, self.num_pages + 1)]
+            page_nav = self.page_range
         else:
             page_nav = self._get_main_page_numbers(page)
+
             start_page = page_nav[0]
-            end_page = page_nav[-1]
             left_jumpers = self._get_left_jumpers(start_page)
+
+            end_page = page_nav[-1]
             right_jumpers = self._get_right_jumpers(end_page)
-            
-            if left_jumpers:
-                page_nav = left_jumpers + [None] + page_nav
-            if right_jumpers:
-                page_nav = page_nav+ [None] + right_jumpers
+
+            page_nav = left_jumpers + page_nav + right_jumpers
+
         return page_nav
+
+    @property
+    def is_paginated(self):
+        return self.count > self.per_page
 

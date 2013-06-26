@@ -46,6 +46,15 @@ class PaginatorTest(TestCase):
         self.assertEqual(delta_left, 4)
         self.assertEqual(delta_right, 5)
 
+
+    def test_is_paginated(self):
+        paginator = Paginator(self.object_list, per_page=10)
+        self.assertEqual(paginator.is_paginated, True)
+
+        paginator = Paginator(self.object_list, per_page=100)
+        self.assertEqual(paginator.is_paginated, False)
+
+
     def test_main_page_numbers_exactly(self):
         paginator = Paginator(self.object_list,
                               per_page=10,
@@ -83,14 +92,45 @@ class PaginatorTest(TestCase):
         self.assertEqual(paginator._get_main_page_numbers(7), [4, 5, 6, 7, 8])
         self.assertEqual(paginator._get_main_page_numbers(8), [4, 5, 6, 7, 8])
         
-    def test_main_page_numbers_long(self):
+    def test_left_jumper(self):
         paginator = Paginator(self.object_list,
-                              per_page=3,
-                              max_page_nav=5)
+                              per_page=4,
+                              max_page_nav=5,
+                              max_jumper=2)
 
-        for page in range(1, paginator.num_pages + 1):
-            print "PAGE", page
-            print paginator._get_page_nav(page)
-            print "----------------"
+        self.assertEqual(paginator.num_pages, 13)
+        self.assertEqual(paginator._get_left_jumpers(1), [])
+        self.assertEqual(paginator._get_left_jumpers(2), [1])
+        self.assertEqual(paginator._get_left_jumpers(3), [1, 2])
+        self.assertEqual(paginator._get_left_jumpers(4), [1, None, 3])
+        self.assertEqual(paginator._get_left_jumpers(5), [1, 3, None])
+        self.assertEqual(paginator._get_left_jumpers(6), [1, 4, None])
+        self.assertEqual(paginator._get_left_jumpers(7), [1, 4, None])
+        self.assertEqual(paginator._get_left_jumpers(8), [1, 5, None])
+        self.assertEqual(paginator._get_left_jumpers(9), [1, 5, None])
+        self.assertEqual(paginator._get_left_jumpers(10), [1, 6, None])
+        self.assertEqual(paginator._get_left_jumpers(11), [1, 6, None])
+        self.assertEqual(paginator._get_left_jumpers(12), [1, 7, None])
+        self.assertEqual(paginator._get_left_jumpers(13), [1, 7, None])
 
+    def test_right_jumper(self):
+        paginator = Paginator(self.object_list,
+                              per_page=4,
+                              max_page_nav=5,
+                              max_jumper=2)
+
+        self.assertEqual(paginator.num_pages, 13)
+        self.assertEqual(paginator._get_right_jumpers(1), [None, 7, 13])
+        self.assertEqual(paginator._get_right_jumpers(2), [None, 7, 13])
+        self.assertEqual(paginator._get_right_jumpers(3), [None, 8, 13])
+        self.assertEqual(paginator._get_right_jumpers(4), [None, 8, 13])
+        self.assertEqual(paginator._get_right_jumpers(5), [None, 9, 13])
+        self.assertEqual(paginator._get_right_jumpers(6), [None, 9, 13])
+        self.assertEqual(paginator._get_right_jumpers(7), [None, 10, 13])
+        self.assertEqual(paginator._get_right_jumpers(8), [None, 10, 13])
+        self.assertEqual(paginator._get_right_jumpers(9), [None, 11, 13])
+        self.assertEqual(paginator._get_right_jumpers(10), [11, None, 13])
+        self.assertEqual(paginator._get_right_jumpers(11), [12, 13])
+        self.assertEqual(paginator._get_right_jumpers(12), [13])
+        self.assertEqual(paginator._get_right_jumpers(13), [])
 
