@@ -134,3 +134,14 @@ class PaginatorTest(TestCase):
         self.assertEqual(paginator._get_right_jumpers(12), [13])
         self.assertEqual(paginator._get_right_jumpers(13), [])
 
+    def test_page_nav(self):
+        paginator = Paginator(self.object_list,
+                              per_page=4,
+                              max_page_nav=5,
+                              max_jumper=2)
+
+        self.assertEqual(paginator.num_pages, 13)
+        self.assertEqual(paginator._get_page_nav(1), [1, 2, 3, 4, 5, None, 9, 13])
+        self.assertEqual(paginator._get_page_nav(8), [1, 4, None, 6, 7, 8, 9, 10, 11, None, 13])
+        self.assertEqual(paginator._get_page_nav(13), [1, 5, None, 9, 10, 11, 12, 13])
+
