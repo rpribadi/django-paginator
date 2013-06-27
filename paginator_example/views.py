@@ -3,6 +3,7 @@ from random import randint, sample
 
 from django.shortcuts import render
 
+from paginator.paginator import Paginator
 
 def _get_random_text():
     random_list = []
@@ -16,9 +17,12 @@ def _get_random_text():
 
 def index(request):
     obj_list = _get_random_text()
+    paginator = Paginator(obj_list)
 
     return render(
         request,
         "index.html",
         {'obj_list': obj_list,
+         'paginator': paginator,
+         'title': 'This is tite',
         })

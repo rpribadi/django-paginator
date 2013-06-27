@@ -33,12 +33,14 @@ class Paginator(Pgtr):
             max_page_nav=DEFAULT_MAX_PAGE_NAV,
             max_jumper=DEFAULT_MAX_JUMPER,
             raise_404_on_invalid_page=DEFAULT_RAISE_404_ON_INVALID_PAGE,
+            page_key='page',
             **kwargs):
 
         super(Paginator, self).__init__(object_list, per_page, **kwargs)
         self.max_page_nav = max_page_nav
         self.max_jumper = max_jumper
         self.raise_404_on_invalid_page = raise_404_on_invalid_page
+        self.page_key=page_key
 
     def _get_delta(self):
         delta_left = int((self.max_page_nav - 1 )/ 2)
@@ -115,7 +117,7 @@ class Paginator(Pgtr):
 
         return jumpers
 
-    def _get_page_nav(self, page):
+    def _get_page_nav(self, page=1):
         page_nav = []
         if self.num_pages <= self.max_page_nav:
             page_nav = self.page_range
@@ -131,6 +133,10 @@ class Paginator(Pgtr):
             page_nav = left_jumpers + page_nav + right_jumpers
 
         return page_nav
+
+    @property
+    def page_nav(self):
+        return self._get_page_nav()
 
     @property
     def is_paginated(self):

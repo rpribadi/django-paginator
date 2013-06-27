@@ -1,0 +1,19 @@
+{% if paginator.is_paginated %}
+<div class="pagination">
+<ul>
+    <li><a href="#" class=''>First</a></li>
+    <li><a href="#" class=''>Prev</a></li>
+    {% for page in paginator.page_nav %}
+    <li>
+        {% if page %}
+        <a href="?{{ paginator.page_key }}={{ page }}">{{ page }}</a>
+        {% else %}
+        ...
+        {% endif %}
+    </li>
+    {% endfor %}
+    <li><a href="#" class=''>Next</a></li>
+    <li><a href="#" class=''>Last</a></li>
+</ul>
+</div>
+{% endif %}

@@ -1,3 +1,4 @@
+{% load paginator_tags %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -21,6 +22,7 @@
 	            </tr>
 	        </thead>
 	        <tbody>
+	            {{ paginator|render_nav }}
 		        {% for obj in obj_list %}
 		        <tr>
                     <td>{{ forloop.counter }}</td>
